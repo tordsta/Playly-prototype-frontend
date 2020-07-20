@@ -1,38 +1,37 @@
 {
-  "name": "playly_prototype",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@andyet/simplewebrtc": "^1.22.1",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
-    "redux": "^4.0.5",
-    "redux-thunk": "^2.3.0",
-    "typescript": "^3.9.5"
-  },
+  "name": "playlyprototype",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "webpack",
+    "deploy": "aws s3 cp ./dist/bundle.js s3://playlyreact/ --acl public-read",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development --progress --colors --port 3000",
+    "bd": "npm run build && npm run deploy"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tordsta/playlyPrototype.git"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "author": "Tord Standnes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tordsta/playlyPrototype/issues"
+  },
+  "homepage": "https://github.com/tordsta/playlyPrototype#readme",
+  "description": "",
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.5",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }
