@@ -1,6 +1,6 @@
 import React, { useEffect, useState} from 'react' 
 
-export default function LocalVideoSteam(props) {
+export default function RemoteVideoSteam(props) {
     const [video,]=useState(React.createRef());
 
     const videoError=(error)=>{
@@ -11,11 +11,18 @@ export default function LocalVideoSteam(props) {
         video.current.srcObject = stream;
     }
 
-    useEffect(() => {
-        navigator.mediaDevices.getUserMedia({video: true})
-        .then(handleVideo)
-        .catch(videoError);
-    });
+    //get props video steam
+    try {
+        handleVideo(props.remoteSteam);
+    } catch(e) {
+        videoError(e);
+    }
+
+//    useEffect(() => {
+//        navigator.mediaDevices.getUserMedia({video: true})
+//        .then(handleVideo)
+//        .catch(videoError);
+//    });
 
     return (
     <div>
@@ -28,4 +35,4 @@ export default function LocalVideoSteam(props) {
         />        
     </div>
     );
-}  
+}
