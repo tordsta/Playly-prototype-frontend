@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "build": "node server.js",
+    "deploy": "",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "bd": "",
+    "ssh": "sudo ssh -i ./EC2PlaylyPrototype.pem ec2-user@ec2-18-189-30-204.us-east-2.compute.amazonaws.com"
+  },
+  "author": "Tord Standnes",
+  "license": "None",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tordsta/playlyPrototype.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tordsta/playlyPrototype/issues"
+  },
+  "homepage": "https://github.com/tordsta/playlyPrototype#readme",
+  "dependencies": {
+    "path": "^0.12.7",
+    "express": "^4.17.1"
+  }
+}
