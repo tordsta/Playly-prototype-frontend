@@ -2,16 +2,7 @@ import React, { PureComponent } from 'react';
 
 class RTCVideo extends PureComponent {
   constructor(props) {
-    super(props)
-  }
-
-  componentDidMount(){
-    console.log("helo")
-  }
-
-  componentDidUpdate(){
-    console.log("updated")
-    console.log(this.props)
+    super(props) //Takes in a media stream
   }
 
   addMediaStream = (video) => {
@@ -32,7 +23,6 @@ class RTCVideo extends PureComponent {
         autoPlay
         ref={mediaStream ? this.addMediaStream : null}
       >
-        <track default kind="captions" />
       </video>
     );
   }

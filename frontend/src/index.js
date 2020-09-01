@@ -46,7 +46,7 @@ class App extends Component {
 
         This is ReactRTC imported component
         <ErrorBoundary>
-          <RTCMesh URL="wss:localhost:3000"/>
+          <RTCMesh URL="ws://localhost:3001"/>
         </ErrorBoundary>
 
       </div>     
