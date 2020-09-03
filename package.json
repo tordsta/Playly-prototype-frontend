@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "build": "node server.js",
-    "deploy": "",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "build-backend": "node ./backend/server.js",
+    "deploy-backend": "",
+    "test-backend": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./backend/server.js",
     "bd": "",
     "ssh": "sudo ssh -i ./EC2PlaylyPrototype.pem ec2-user@ec2-18-189-30-204.us-east-2.compute.amazonaws.com"
   },

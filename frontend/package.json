@@ -14,7 +14,8 @@
     "url": "git+https://github.com/tordsta/playlyPrototype.git"
   },
   "author": "Tord Standnes",
-  "license": "ISC",
+  "license": "None",
+  "private": true,
   "bugs": {
     "url": "https://github.com/tordsta/playlyPrototype/issues"
   },
