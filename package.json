@@ -6,7 +6,7 @@
     "build": "webpack",
     "deploy": "aws s3 cp ./dist/bundle.js s3://playlyreact/ --acl public-read",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --config ./webpack.config.js --mode development --progress --colors --port 3000",
+    "start": "webpack-dev-server --config ./webpack.config.js --mode development --progress --colors --port 3010",
     "bd": "npm run build && npm run deploy"
   },
   "repository": {
@@ -26,7 +26,8 @@
     "css-loader": "^4.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "style-loader": "^1.2.1"
+    "style-loader": "^1.2.1",
+    "websocket": "^1.0.32"
   },
   "devDependencies": {
     "@babel/core": "^7.10.5",

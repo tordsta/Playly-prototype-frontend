@@ -1,5 +1,6 @@
 import React, {Component} from 'react' 
 import ReactDOM from 'react-dom'
+import websocket from "websocket"
 import ErrorBoundary from './errorBoundary';
 
 
@@ -9,46 +10,51 @@ import RemoteVideoSteam from './remoteVideoStream';
 import RTCMesh from './ReactRTC/RTCMesh';
 require("./ReactRTC/index.css")
 
+const url = "wss://localhost:3000/wss";
+
 class App extends Component {
+  ws = new WebSocket(url)
 
   componentDidMount() {
-    //console.log('something something');
-    
-    //transmitter
-    let servers = null;
-    let localPeerConnection = new RTCPeerConnection(servers);
-      //create iceCandidate
-    //localPeerConnection.addEventListener('icecandidate', handleConnection);
-    //handleConnection(event)
-    //const newIceCandidate = new RTCIceCandidate(event.candicate); 
-    //event.target.addIceCandidate(newIceCandidate);
-    
-      //give sdp offer
+    //This is currently only for testing pourposes
+    this.ws.onopen = () => {
+      // on connecting, do nothing but log it to the console
+      console.log('connected')
+    }
 
-
-
-    //reciver
-      //create ice candicate
-      //create anwnser
-      //create remote video steams 
-
+    this.ws.onclose = () => {
+      console.log('disconnected')
+      // fix this - automatically try to reconnect on connection loss
+      //this.setState({
+      //  ws: new WebSocket(URL),
+      //})
+    }
   }
+
 //todo fix ws to wss in backend and stuff 
   render() {
+
+    fetch('https://localhost:3000/up')
+      .then(response => response.text())
+      .then(response => console.log(response));
+
+    
     return (
-      <div>This is a React component inside of Webflow!<br/><br/>
-        
+      <div>        
+
         Your video steam <br/>
         {/*<LocalVideoSteam/>*/}
 
         Remote video stream <br/>
         {/*<RemoteVideoSteam remoteSteam={null} />*/}
 
-        This is ReactRTC imported component
+        This is ReactRTC imported component <br/>
+        {/*
         <ErrorBoundary>
-          <RTCMesh URL="wss://playly.azurewebsites.net:443"/>
-        </ErrorBoundary>
-
+          <RTCMesh URL="wss://localhost:3000"/>
+        </ErrorBoundary>        
+        */}
+        
       </div>     
     )
   }
