@@ -160,8 +160,13 @@ class RTCMesh extends Component {
           sendMessage={sendMessage}
           roomInfo={{ socketID, roomKey }}
         />
-        <RTCVideo mediaStream={localMediaStream} />
-        <RTCVideo mediaStream={remoteMediaStream} />
+        {/*Change layout to css grid and fromat from there*/}
+        <section style={{minWidth: "500px", minHeight: "500px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+          <RTCVideo mediaStream={localMediaStream} style={{width: "200px", height: "150px"}}/>
+          <RTCVideo mediaStream={remoteMediaStream}  style={{width: "200px", height: "150px"}} />
+          <RTCVideo style={{width: "200px", height: "150px"}}/>
+          <RTCVideo style={{width: "200px", height: "150px"}}/>
+        </section>
 
         <Form
           handleSubmit={this.handleSubmit}
