@@ -21,18 +21,17 @@ class RTCMesh extends Component {
       remoteMediaStream1: null,
       remoteMediaStream2: null,
       remoteMediaStream3: null,
-      socketID1: null,
-      socketID2: null,
-      socketID3: null,
+      socketID: null, //identifier for the websocket server
       connectionStarted1: false,
       connectionStarted2: false,
       connectionStarted3: false,
+      numPeerClients: 0
     };
     this.socket = new WebSocket(this.props.URL);
     //TODO create multiple peer connections
     this.rtcPeerConnection1 = new RTCPeerConnection({ iceServers: this.state.iceServers });
-    //this.rtcPeerConnection2 = new RTCPeerConnection({ iceServers: this.state.iceServers });
-    //this.rtcPeerConnection3 = new RTCPeerConnection({ iceServers: this.state.iceServers });
+    this.rtcPeerConnection2 = new RTCPeerConnection({ iceServers: this.state.iceServers });
+    this.rtcPeerConnection3 = new RTCPeerConnection({ iceServers: this.state.iceServers });
   }
 
   openCamera = async (fromHandleOffer) => {
@@ -49,64 +48,137 @@ class RTCMesh extends Component {
   }
 
   handleOffer = async (data) => {
-    const { localMediaStream, roomKey, socketID1 } = this.state;
+    const { localMediaStream, roomKey, socketID } = this.state;
     const { payload } = data;
-    await this.rtcPeerConnection1.setRemoteDescription(payload.message);
-    let mediaStream = localMediaStream
-    if (!mediaStream) mediaStream = await this.openCamera(true);
-    this.setState({ connectionStarted1: true, localMediaStream: mediaStream }, async function() {
-      const answer = await this.rtcPeerConnection1.createAnswer();
-      await this.rtcPeerConnection1.setLocalDescription(answer);
-      const payload = createPayload(roomKey, socketID1, answer);
-      const answerMessage = createMessage(TYPE_ANSWER, payload);
-      this.socket.send(JSON.stringify(answerMessage));
-    });
+    
+    //TODO - this should be able to handle any number of clients
+    if(this.state.numPeerClients == 0){
+      await this.rtcPeerConnection1.setRemoteDescription(payload.message);
+      let mediaStream = localMediaStream
+      if (!mediaStream) mediaStream = await this.openCamera(true);
+      this.setState({ connectionStarted1: true, localMediaStream: mediaStream }, async function() {
+        const answer = await this.rtcPeerConnection1.createAnswer();
+        await this.rtcPeerConnection1.setLocalDescription(answer);
+        const payload = createPayload(roomKey, socketID, answer);
+        const answerMessage = createMessage(TYPE_ANSWER, payload);
+        this.socket.send(JSON.stringify(answerMessage));
+      });
+    } else if (this.state.numPeerClients == 1){
+      await this.rtcPeerConnection2.setRemoteDescription(payload.message);
+      //let mediaStream = localMediaStream
+      //if (!mediaStream) mediaStream = await this.openCamera(true);
+      this.setState({ connectionStarted2: true }, async function() {
+        const answer = await this.rtcPeerConnection2.createAnswer();
+        await this.rtcPeerConnection2.setLocalDescription(answer);
+        const payload = createPayload(roomKey, socketID, answer);
+        const answerMessage = createMessage(TYPE_ANSWER, payload);
+        this.socket.send(JSON.stringify(answerMessage));
+      });
+    } else if (this.state.numPeerClients == 2){
+      await this.rtcPeerConnection3.setRemoteDescription(payload.message);
+      //let mediaStream = localMediaStream
+      //if (!mediaStream) mediaStream = await this.openCamera(true);
+      this.setState({ connectionStarted3: true }, async function() {
+        const answer = await this.rtcPeerConnection3.createAnswer();
+        await this.rtcPeerConnection3.setLocalDescription(answer);
+        const payload = createPayload(roomKey, socketID, answer);
+        const answerMessage = createMessage(TYPE_ANSWER, payload);
+        this.socket.send(JSON.stringify(answerMessage));
+      });
+    } else {
+      console.log("Handle Offer - Too many clients!")
+    }
+
+    //RTC clients ether gets an offer or an answer, so on both occations it counts up the number of connected clients
+    this.setState({numPeerClients: this.state.numPeerClients + 1});
+    console.log(this.state.numPeerClients)
   }
 
   handleAnswer = async (data) => {
     const { payload } = data;
-    await this.rtcPeerConnection1.setRemoteDescription(payload.message);
+
+    //TODO - this should be able to handle any number of clients
+    if(this.state.numPeerClients == 0){
+      await this.rtcPeerConnection1.setRemoteDescription(payload.message);
+    } else if (this.state.numPeerClients == 1){
+      await this.rtcPeerConnection2.setRemoteDescription(payload.message);
+    } else if (this.state.numPeerClients == 2){
+      await this.rtcPeerConnection3.setRemoteDescription(payload.message);
+    } else {
+      console.log("Handle answer - Too many clients!")
+    }
+
+
+    //RTC clients ether gets an offer or an answer, so on both occations it counts up the number of connected clients
+    this.setState({numPeerClients: this.state.numPeerClients + 1});
+    console.log(this.state.numPeerClients)
   }
 
   handleIceCandidate = async (data) => {
     const { message } = data.payload;
     const candidate = JSON.parse(message);
-    await this.rtcPeerConnection1.addIceCandidate(candidate);
+    //TODO - this should be able to handle any number of clients
+    if(this.state.numPeerClients == 0){
+      await this.rtcPeerConnection1.addIceCandidate(candidate);
+    } else if (this.state.numPeerClients == 1){
+      await this.rtcPeerConnection2.addIceCandidate(candidate);
+    } else if (this.state.numPeerClients == 2){
+      await this.rtcPeerConnection3.addIceCandidate(candidate);
+    } else {
+      console.log("Handle Ice candidate - Too many clients!")
+    }
+
   }
 
   sendRoomKey = () => {
-    const { roomKey, socketID1 } = this.state;
+    const { roomKey, socketID } = this.state;
     if (!roomKey) {
       const key = generateRoomKey();
-      const roomData = createMessage(TYPE_ROOM, createPayload(key, socketID1));
+      const roomData = createMessage(TYPE_ROOM, createPayload(key, socketID));
       this.setState({ roomKey: key })
       this.socket.send(JSON.stringify(roomData));
       alert(key);
     }
   }
 
-  handleSocketConnection = (socketID1) => {
-    this.setState({ socketID1 });
+  handleSocketConnection = (socketID) => {
+    this.setState({socketID});
   }
 
   handleConnectionReady = (message) => {
     console.log('Inside handleConnectionReady: ', message);
+    //TODO - this should be able to handle any number of clients
     if (message.startConnection) {
-      this.setState({ connectionStarted1: message.startConnection });
+      if(this.state.numPeerClients == 0){
+        this.setState({ connectionStarted1: message.startConnection });
+      } else if (this.state.numPeerClients == 1) {
+        this.setState({ connectionStarted2: message.startConnection });
+      } else if (this.state.numPeerClients == 2) {
+        this.setState({ connectionStarted3: message.startConnection });
+      }
     }
   }
 
-  addRemoteStream = (remoteMediaStream1) => {
-    this.setState({ remoteMediaStream1 });
+  addRemoteStream = (remoteMediaStream) => {
+    //TODO - this should be able to handle any number of clients
+    if(this.state.numPeerClients == 0){
+      this.setState({remoteMediaStream1: remoteMediaStream});
+    } else if (this.state.numPeerClients == 1){
+      this.setState({remoteMediaStream2: remoteMediaStream});
+    } else if (this.state.numPeerClients == 2){
+      this.setState({remoteMediaStream3: remoteMediaStream});
+    } else {
+      console.log("Add Remote Stream - Too many clients!")
+    }
   }
 
   handleSubmit = (event) => {
     event.preventDefault();
-    const { text, socketID1 } = this.state;
+    const { text, socketID } = this.state;
     // send the roomKey
     // Remove leading and trailing whitespace
     if (text.trim()) {
-      const roomKeyMessage = createMessage(TYPE_ROOM, createPayload(text, socketID1));
+      const roomKeyMessage = createMessage(TYPE_ROOM, createPayload(text, socketID));
       this.socket.send(JSON.stringify(roomKeyMessage));
     };
     this.setState({ text: '', roomKey: text.trim() });
@@ -122,11 +194,15 @@ class RTCMesh extends Component {
     const { 
       localMediaStream,
       remoteMediaStream1,
+      remoteMediaStream2,
+      remoteMediaStream3,
       text,
       roomKey,
-      socketID1,
+      socketID,
       iceServers,
       connectionStarted1,
+      connectionStarted2,
+      connectionStarted3,
     } = this.state;
     const sendMessage = this.socket.send.bind(this.socket);
 
@@ -151,14 +227,33 @@ class RTCMesh extends Component {
           addRemoteStream={this.addRemoteStream}
           startConnection={connectionStarted1}
           sendMessage={sendMessage}
-          roomInfo={{ socketID1, roomKey }}
+          roomInfo={{ socketID, roomKey }}
         />
+        <PeerConnection
+          rtcPeerConnection={this.rtcPeerConnection2}
+          iceServers={iceServers}
+          localMediaStream={localMediaStream}
+          addRemoteStream={this.addRemoteStream}
+          startConnection={connectionStarted2}
+          sendMessage={sendMessage}
+          roomInfo={{ socketID, roomKey }}
+        />
+        <PeerConnection
+          rtcPeerConnection={this.rtcPeerConnection3}
+          iceServers={iceServers}
+          localMediaStream={localMediaStream}
+          addRemoteStream={this.addRemoteStream}
+          startConnection={connectionStarted3}
+          sendMessage={sendMessage}
+          roomInfo={{ socketID, roomKey }}
+        />
+
         {/*Change layout to css grid and fromat from there*/}
         <section style={{minWidth: "500px", minHeight: "500px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
           <RTCVideo mediaStream={localMediaStream} style={{width: "200px", height: "150px"}}/>
-          <RTCVideo mediaStream={remoteMediaStream1}  style={{width: "200px", height: "150px"}} />
-          <RTCVideo style={{width: "200px", height: "150px"}}/>
-          <RTCVideo style={{width: "200px", height: "150px"}}/>
+          <RTCVideo mediaStream={remoteMediaStream1} style={{width: "200px", height: "150px"}} />
+          <RTCVideo mediaStream={remoteMediaStream2} style={{width: "200px", height: "150px"}}/>
+          <RTCVideo mediaStream={remoteMediaStream3} style={{width: "200px", height: "150px"}}/>
         </section>
 
         <Form

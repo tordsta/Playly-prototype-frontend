@@ -25,7 +25,7 @@ class Websocket extends Component {
       const data = JSON.parse(message.data);
       switch (data.type) {
         case TYPE_NEW_USER:
-          handleSocketConnection(data.id);
+          handleSocketConnection(data.id); //Uses the server socket id for this client
           break;
         case TYPE_CONNECTION:
           handleConnectionReady(data);
