@@ -14,6 +14,7 @@ class Websocket extends Component {
       handleOffer,
       handleAnswer,
       handleIceCandidate,
+      handleUsers,
     } = this.props;
 
     socket.onopen = () => {
@@ -41,6 +42,10 @@ class Websocket extends Component {
         case TYPE_ICECANDIDATE:
           console.log('case Ice Candidate')
           handleIceCandidate(data);
+          break;
+        case "USERS_IN_ROOM":
+          console.log("Users in room")
+          handleUsers(data);
           break;
         default:
           console.error('Recieving message failed');

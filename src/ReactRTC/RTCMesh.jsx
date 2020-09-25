@@ -25,7 +25,8 @@ class RTCMesh extends Component {
       connectionStarted1: false,
       connectionStarted2: false,
       connectionStarted3: false,
-      numPeerClients: 0
+      numPeerClients: 0,
+      users: null,
     };
     this.socket = new WebSocket(this.props.URL);
     //TODO create multiple peer connections
@@ -45,6 +46,28 @@ class RTCMesh extends Component {
     } catch(error) {
       console.error('getUserMedia Error: ', error)
     }
+  }
+
+  handleUsers = async (data) => {
+    //console.log(data.payload);
+    this.setState({users: data.payload})
+
+    this.state.users.forEach(user => {
+      if(user != this.state.socketID){
+        console.log(user);
+        let peerSender = this.state.socketID;
+        let peerReceiver = user;
+        
+        const peerData = createMessage(
+          "PEER_CONNECTION", 
+          createPayload(
+            this.state.roomKey,
+            this.state.socketID,
+            peerReceiver
+          ));
+        this.socket.send(JSON.stringify(peerData));
+      }
+    });
   }
 
   handleOffer = async (data) => {
@@ -145,6 +168,7 @@ class RTCMesh extends Component {
     this.setState({socketID});
   }
 
+  //START HERE!! THIS IS WHERE YOU LEFT OF - GO DIRECTLY FOR ANY NUMBER OF USERS
   handleConnectionReady = (message) => {
     console.log('Inside handleConnectionReady: ', message);
     //TODO - this should be able to handle any number of clients
@@ -219,6 +243,7 @@ class RTCMesh extends Component {
           handleOffer={this.handleOffer}
           handleAnswer={this.handleAnswer}
           handleIceCandidate={this.handleIceCandidate}
+          handleUsers={this.handleUsers}
         />
         <PeerConnection
           rtcPeerConnection={this.rtcPeerConnection1}
