@@ -17,4 +17,4 @@ export const generateRoomKey = () => {
 };
 
 export const createMessage = (type, payload) => ({ type, payload });
-export const createPayload = (roomKey, socketID, message = null) => ({ roomKey, socketID, message });
+export const createPayload = (roomKey, socketID, message, receiver = null) => ({ roomKey, socketID, message, receiver });

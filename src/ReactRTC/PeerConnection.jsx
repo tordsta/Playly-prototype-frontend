@@ -12,7 +12,7 @@ class PeerConnection extends Component {
     console.log('addMediaStream: ', localMediaStream);
     if (localMediaStream) {
       await localMediaStream.getTracks().forEach((mediaStreamTrack) => {
-        rtcPeerConnection.addTrack(mediaStreamTrack);
+        rtcPeerConnection.addTrack(mediaStreamTrack); //This fires the "onNegotiationNeeded" event
       });
     }
   }
@@ -22,7 +22,7 @@ class PeerConnection extends Component {
     try {
       const offer = await rtcPeerConnection.createOffer();
       await rtcPeerConnection.setLocalDescription(offer);
-      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, rtcPeerConnection.localDescription);
+      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, rtcPeerConnection.localDescription, roomInfo.receiver);
       const offerMessage = createMessage(TYPE_OFFER, payload);
       sendMessage(JSON.stringify(offerMessage));
     } catch(error) {
@@ -34,7 +34,7 @@ class PeerConnection extends Component {
     if (rtcPeerConnectionIceEvent.candidate) {
       const { sendMessage, roomInfo } = this.props;
       const { candidate } = rtcPeerConnectionIceEvent;
-      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, JSON.stringify(candidate));
+      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, JSON.stringify(candidate), roomInfo.receiver);
       const iceCandidateMessage = createMessage(TYPE_ICECANDIDATE, payload);
       sendMessage(JSON.stringify(iceCandidateMessage));
     }

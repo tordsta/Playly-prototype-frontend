@@ -15,6 +15,7 @@ class Websocket extends Component {
       handleAnswer,
       handleIceCandidate,
       handleUsers,
+      socketID,
     } = this.props;
 
     socket.onopen = () => {
@@ -22,7 +23,17 @@ class Websocket extends Component {
     }
 
     socket.onmessage = (message) => {
-      console.log('Recieving Websocket message: ', message);
+      let res = null;
+      try{
+        res = message.payload.receiver;
+      } catch {
+      }
+      
+      if(res == socketID){
+        console.log('Recieving Websocket message: ', message);
+      } else {
+        console.log('Unknown receiver - Recieving Websocket message: ', message);
+      }
       const data = JSON.parse(message.data);
       switch (data.type) {
         case TYPE_NEW_USER:
@@ -44,7 +55,7 @@ class Websocket extends Component {
           handleIceCandidate(data);
           break;
         case "USERS_IN_ROOM":
-          console.log("Users in room")
+          console.log(" case Users in room")
           handleUsers(data);
           break;
         default:
