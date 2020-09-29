@@ -11,6 +11,7 @@ class PeerConnection extends Component {
     const { localMediaStream, rtcPeerConnection } = this.props
     console.log('addMediaStream: ', localMediaStream);
     if (localMediaStream) {
+      console.log("trigger offer")
       await localMediaStream.getTracks().forEach((mediaStreamTrack) => {
         rtcPeerConnection.addTrack(mediaStreamTrack); //This fires the "onNegotiationNeeded" event
       });
@@ -18,31 +19,36 @@ class PeerConnection extends Component {
   }
 
   handleOnNegotiationNeeded = async (negotiationNeededEvent) => {
-    const { sendMessage, roomInfo, rtcPeerConnection } = this.props;
-    try {
-      const offer = await rtcPeerConnection.createOffer();
-      await rtcPeerConnection.setLocalDescription(offer);
-      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, rtcPeerConnection.localDescription, roomInfo.receiver);
-      const offerMessage = createMessage(TYPE_OFFER, payload);
-      sendMessage(JSON.stringify(offerMessage));
-    } catch(error) {
-      console.error('handleNegotiationNeeded Error: ', error)
+    const { socketID, sendMessage, roomInfo, rtcPeerConnection, receiverID } = this.props;
+    if(socketID != receiverID){
+      try {
+        const offer = await rtcPeerConnection.createOffer();
+        await rtcPeerConnection.setLocalDescription(offer);
+        const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, rtcPeerConnection.localDescription, receiverID);
+        const offerMessage = createMessage(TYPE_OFFER, payload);
+        sendMessage(JSON.stringify(offerMessage));
+      } catch(error) {
+        console.error('handleNegotiationNeeded Error: ', error)
+      }  
     }
   }
 
   handleOnIceEvent = (rtcPeerConnectionIceEvent) => {
+    console.log("handleOnIceEvent")
     if (rtcPeerConnectionIceEvent.candidate) {
-      const { sendMessage, roomInfo } = this.props;
+      const { sendMessage, roomInfo, receiverID } = this.props;
       const { candidate } = rtcPeerConnectionIceEvent;
-      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, JSON.stringify(candidate), roomInfo.receiver);
+      const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, JSON.stringify(candidate), receiverID);
       const iceCandidateMessage = createMessage(TYPE_ICECANDIDATE, payload);
       sendMessage(JSON.stringify(iceCandidateMessage));
     }
   }
 
   handleOnTrack = (trackEvent) => {
+    console.log("handleOnTrack")
+    const { index } = this.props;
     const remoteMediaStream = new MediaStream([ trackEvent.track ]);
-    this.props.addRemoteStream(remoteMediaStream);
+    this.props.addRemoteStream(remoteMediaStream, index);
   }
 
   componentDidMount() {
@@ -53,7 +59,13 @@ class PeerConnection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.startConnection !== prevProps.startConnection) {
+    //console.log("component did update")
+    console.log("this.props.startConnection",this.props.startConnection)
+    console.log("prevProps.startConnection", prevProps.startConnection)
+    console.log("activate addmediastreamtrack", this.props.startConnection !== prevProps.startConnection, this.props.rtcPeerConnection)
+    //console.log("activate addmediastreamtrack", this.props.startConnection == true && (prevProps.startConnection == undefined || prevProps.startConnection == false ) )
+
+    if (this.props.startConnection !== prevProps.startConnection){
       this.addMediaStreamTrack();
     }
   }

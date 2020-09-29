@@ -25,20 +25,10 @@ class RTCMesh extends Component {
 
       //receiver is bad - fix it
       receiver: false, //the user which currently, only one RTC connection should be active at the time,  
-      connectionStarted1: false,
-      connectionStarted2: false,
-      connectionStarted3: false,
-      
-      //this is handled in a terrible way - fix it
-      numPeerClients: 0,
       users: {}, // object with users and connection state (true/false)
 
     };
     this.socket = new WebSocket(this.props.URL);
-    //TODO create multiple peer connections
-    this.rtcPeerConnection1 = new RTCPeerConnection({ iceServers: this.state.iceServers });
-    this.rtcPeerConnection2 = new RTCPeerConnection({ iceServers: this.state.iceServers });
-    this.rtcPeerConnection3 = new RTCPeerConnection({ iceServers: this.state.iceServers });
   }
 
   componentDidMount(prevProps, prevState) {
@@ -60,137 +50,6 @@ class RTCMesh extends Component {
     
   }
 
-  handleUsers = async (data) => {
-    console.log(data.payload);
-
-    //adds new users to state
-    //TODO: add a peer connection per user, in the user object
-    this.setState(prevState => {
-      let users = Object.assign({}, prevState.users);      
-      data.payload.forEach(user => {
-        if(!(user in this.state.users) && user != this.state.socketID){
-          users[user] = false      
-        }
-      });
-      return {users};
-    });
-    //console.log("state users", this.state.users)
-
-    //Send out connection requests
-    let tempVar = true; 
-    //Only connection can be send per user becuse of lack of user handeling
-    //a queue for connections needs to be maid and dynamic rendering of videos / video-variabels needs to be maid.
-    for (const [user, connected] of Object.entries(this.state.users)) {
-      //console.log(`${user}: ${connected}`);
-      if(!connected && this.state.receiver == false &&tempVar){
-        tempVar=false;
-        let peerReceiver = user;        
-        const peerData = createMessage(
-          "PEER_CONNECTION", 
-          createPayload(
-            this.state.roomKey,
-            this.state.socketID, //socketID / userID of sender / this client
-            peerReceiver
-          ));
-        this.socket.send(JSON.stringify(peerData));
-      }
-    }
-  }
-
-  handleOffer = async (data) => {
-    const { localMediaStream, roomKey, socketID } = this.state;
-    const { payload } = data;
-
-    //check if i am reciever 
-    //console.log("In offer handle: me -", payload.receiver)
-    //console.log("In offer handle: the other one - ", payload.socketID)
-    this.setState({receiver: payload.socketID})
-    const receiver = payload.socketID
-    
-    //TODO - this should be able to handle any number of clients
-    if(this.state.numPeerClients == 0 && payload.receiver == socketID){
-      await this.rtcPeerConnection1.setRemoteDescription(payload.message);
-      let mediaStream = localMediaStream
-      if (!mediaStream) mediaStream = await this.openCamera(true);
-      this.setState({ connectionStarted1: true, localMediaStream: mediaStream }, async function() {
-        const answer = await this.rtcPeerConnection1.createAnswer();
-        await this.rtcPeerConnection1.setLocalDescription(answer);
-        const payload = createPayload(roomKey, socketID, answer, receiver);
-        const answerMessage = createMessage(TYPE_ANSWER, payload);
-        this.socket.send(JSON.stringify(answerMessage));
-      });
-    } else if (this.state.numPeerClients == 1 && payload.receiver == socketID){
-      await this.rtcPeerConnection2.setRemoteDescription(payload.message);
-      //let mediaStream = localMediaStream
-      //if (!mediaStream) mediaStream = await this.openCamera(true);
-      this.setState({ connectionStarted2: true }, async function() {
-        const answer = await this.rtcPeerConnection2.createAnswer();
-        await this.rtcPeerConnection2.setLocalDescription(answer);
-        const payload = createPayload(roomKey, socketID, answer, receiver);
-        const answerMessage = createMessage(TYPE_ANSWER, payload);
-        this.socket.send(JSON.stringify(answerMessage));
-      });
-    } else if (this.state.numPeerClients == 2 && payload.receiver == socketID){
-      await this.rtcPeerConnection3.setRemoteDescription(payload.message);
-      //let mediaStream = localMediaStream
-      //if (!mediaStream) mediaStream = await this.openCamera(true);
-      this.setState({ connectionStarted3: true }, async function() {
-        const answer = await this.rtcPeerConnection3.createAnswer();
-        await this.rtcPeerConnection3.setLocalDescription(answer);
-        const payload = createPayload(roomKey, socketID, answer, receiver);
-        const answerMessage = createMessage(TYPE_ANSWER, payload);
-        this.socket.send(JSON.stringify(answerMessage));
-      });
-    } else {
-      console.log("Handle Offer - Too many clients!")
-    }
-
-    //RTC clients ether gets an offer or an answer, so on both occations it counts up the number of connected clients
-    this.setState({numPeerClients: this.state.numPeerClients + 1});
-    console.log(this.state.numPeerClients)
-  }
-
-  handleAnswer = async (data) => {
-    const { payload } = data;
-
-    //TODO - this should be able to handle any number of clients
-    if(this.state.numPeerClients == 0 && payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection1.setRemoteDescription(payload.message);
-    } else if (this.state.numPeerClients == 1 && payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection2.setRemoteDescription(payload.message);
-    } else if (this.state.numPeerClients == 2 && payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection3.setRemoteDescription(payload.message);
-    } else {
-      console.log("Handle answer - Too many clients!")
-    }
-
-
-    //RTC clients ether gets an offer or an answer, so on both occations it counts up the number of connected clients
-    this.setState({numPeerClients: this.state.numPeerClients + 1});
-    console.log(this.state.numPeerClients)
-  }
-
-  handleIceCandidate = async (data) => {
-    const { message } = data.payload;
-    const candidate = JSON.parse(message);
-    //console.log(data);
-    //console.log(data.payload);
-    //console.log(data.payload.receiver);
-    //console.log(this.state.socketID)
-
-    //TODO - this should be able to handle any number of clients
-    if(this.state.numPeerClients == 0 && data.payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection1.addIceCandidate(candidate);
-    } else if (this.state.numPeerClients == 1 && data.payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection2.addIceCandidate(candidate);
-    } else if (this.state.numPeerClients == 2 && data.payload.receiver == this.state.socketID){
-      await this.rtcPeerConnection3.addIceCandidate(candidate);
-    } else {
-      console.log("Handle Ice candidate - Too many clients!")
-    }
-
-  }
-
   sendRoomKey = () => {
     const { roomKey, socketID } = this.state;
     if (!roomKey) {
@@ -206,35 +65,140 @@ class RTCMesh extends Component {
     this.setState({socketID});
   }
 
-  handleConnectionReady = (message) => {
-    console.log('Inside handleConnectionReady: ', message);
-    //TODO - this should be able to handle any number of clients
-    console.log("Is sender:", message.sender == this.state.socketID);
-    if (message.startConnection && message.sender == this.state.socketID) {
-      this.setState({receiver: message.receiver})
-      if(this.state.numPeerClients == 0){
-        this.setState({ connectionStarted1: message.startConnection }); //this triggers the addMediaStreamTrack, which triggers the onNegotiationNeeded event
-      } else if (this.state.numPeerClients == 1) {
-        this.setState({ connectionStarted2: message.startConnection });
-      } else if (this.state.numPeerClients == 2) {
-        this.setState({ connectionStarted3: message.startConnection });
+  handleUsers = async (data) => {
+    this.setState(prevState => {
+      let users = Object.assign({}, prevState.users);      
+      data.payload.forEach(user => {
+        if(!(user in this.state.users) && user != this.state.socketID){
+          let rtcPeerConnection = new RTCPeerConnection({ iceServers: this.state.iceServers });
+          users[user] = {connection: false, rtcPeerConnection: rtcPeerConnection};     
+        }
+      });
+      return {users};
+    });
+    console.log("state users", this.state.users)
+
+    //Send out connection requests
+    for (const [user, obj] of Object.entries(this.state.users)) {
+      //console.log(`${user}: ${connected}`);
+      if(!obj.connected && this.state.receiver == false ){
+        let peerReceiver = user;        
+        const peerData = createMessage(
+          "PEER_CONNECTION", 
+          createPayload(
+            this.state.roomKey,
+            this.state.socketID, //socketID / userID of sender / this client
+            peerReceiver
+          ));
+        this.socket.send(JSON.stringify(peerData));
       }
     }
   }
 
-  addRemoteStream = (remoteMediaStream) => {
-    //TODO - this should be able to handle any number of clients
-    if(this.state.numPeerClients == 0){
-      this.setState({remoteMediaStream1: remoteMediaStream});
-    } else if (this.state.numPeerClients == 1){
-      this.setState({remoteMediaStream2: remoteMediaStream});
-    } else if (this.state.numPeerClients == 2){
-      this.setState({remoteMediaStream3: remoteMediaStream});
+  handleConnectionReady = (message) => {
+    console.log('Inside handleConnectionReady: ', message);
+    console.log("Is sender:", message.sender == this.state.socketID);
+    if (message.startConnection && message.sender == this.state.socketID) {
+      //this.setState({receiver: message.receiver})
+      //this.setState({ connectionStarted1: message.startConnection }); //this triggers the addMediaStreamTrack, which triggers the onNegotiationNeeded event
+      this.setState(prevState => {
+        let users = Object.assign({}, prevState.users);
+        users[message.receiver].connection = true;   // this one activates the add track 
+        return {users};
+      });
+
+    //this is the problem 
+    } else { // if not sender sett start connection
+      this.setState(prevState => {
+        let users = Object.assign({}, prevState.users);
+        let rtcPeerConnection = new RTCPeerConnection({ iceServers: this.state.iceServers });
+        users[message.sender] = {connection: false, rtcPeerConnection: rtcPeerConnection};    //this does not activate add track
+        return {users};
+      });
+    }
+    console.log("state users", this.state.users);
+  }
+
+
+
+  handleOffer = async (data) => {
+    const { localMediaStream, roomKey, socketID, users } = this.state;
+    const { payload } = data;
+
+    //check if i am reciever 
+    console.log("In offer handle: me -", payload.receiver)
+    console.log("In offer handle: the other one - ", payload.socketID)
+    const receiver = payload.socketID
+    
+    if(payload.receiver == socketID){
+      await users[receiver].rtcPeerConnection.setRemoteDescription(payload.message);
+      let mediaStream = localMediaStream
+      if (!mediaStream) mediaStream = await this.openCamera(true);
+      //set user state to true
+
+      //hack to activate add track media only once
+      this.setState(prevState => {
+        let users = Object.assign({}, prevState.users);
+        users[payload.socketID].connection = true;   // this one activates the add track 
+        return {users};
+      });      
+      
+
+      this.setState({ connectionStarted1: true, localMediaStream: mediaStream }, async function() {
+        const answer = await users[receiver].rtcPeerConnection.createAnswer();
+        await users[receiver].rtcPeerConnection.setLocalDescription(answer);
+        const payload = createPayload(roomKey, socketID, answer, receiver);
+        const answerMessage = createMessage(TYPE_ANSWER, payload);
+        this.socket.send(JSON.stringify(answerMessage));
+      });
     } else {
-      console.log("Add Remote Stream - Too many clients!")
+      console.log("Handle Offer - Not valid")
     }
   }
 
+  handleAnswer = async (data) => {
+    const { payload } = data;
+    //console.log("here");
+    //console.log(data)
+    //console.log(data.payload)
+    //console.log(payload.socketID)
+    //console.log(this.state.users[payload.socketID])
+    if(payload.receiver == this.state.socketID){
+      await this.state.users[payload.socketID].rtcPeerConnection.setRemoteDescription(payload.message);
+    } else {
+      console.log("Handle answer - Not valid")
+    }
+  }
+
+  handleIceCandidate = async (data) => {
+    const { message } = data.payload;
+    const candidate = JSON.parse(message);
+    //console.log(data);
+    //console.log(data.payload);
+    //console.log(data.payload.receiver);
+    //console.log(this.state.socketID)
+    //console.log(data.payload.receiver == this.state.socketID)
+
+    //TODO - this should be able to handle any number of clients
+    if(data.payload.receiver == this.state.socketID){
+      await this.state.users[data.payload.socketID].rtcPeerConnection.addIceCandidate(candidate);
+    } else {
+      console.log("Handle Ice candidate - Not valid")
+    }
+
+  }
+
+  addRemoteStream = (remoteMediaStream, index) => {
+    if(index == 0){
+      this.setState({remoteMediaStream1: remoteMediaStream});
+    } else if (index == 1){
+      this.setState({remoteMediaStream2: remoteMediaStream});
+    } else if (index == 2){
+      this.setState({remoteMediaStream3: remoteMediaStream});
+    }
+  }
+
+  
   handleSubmit = (event) => {
     event.preventDefault();
     const { text, socketID } = this.state;
@@ -253,7 +217,7 @@ class RTCMesh extends Component {
     });
   }
 
-  //TODO - make dynamic rendering of video components https://dev.to/andyrewlee/how-to-dynamically-render-components-in-react-4n7g
+
   render() {
     const { 
       localMediaStream,
@@ -263,16 +227,20 @@ class RTCMesh extends Component {
       text,
       roomKey,
       socketID,
-      iceServers,
-      connectionStarted1,
-      connectionStarted2,
-      connectionStarted3,
-      receiver
+      iceServers, //used to be passed into the websocket component
+      receiver,
+      users
     } = this.state;
     const sendMessage = this.socket.send.bind(this.socket);
 
     //one websocket connection to the server 
     //multiple peer connections to other clients
+
+    const peerExist = Boolean(Object.keys(users).length > 0 );
+    const peerExist1 = Boolean(Object.keys(users).length > 1 );
+    const peerExist2 = Boolean(Object.keys(users).length > 2 );
+    //console.log("peer exist", peerExist, Object.keys(users).length, users)
+    //console.log("reciverID: ", Object.keys(users)[0]);
 
     return (
       <>
@@ -287,6 +255,8 @@ class RTCMesh extends Component {
           handleUsers={this.handleUsers}
           socketID={this.state.socketID}
         />
+
+        {/*
         <PeerConnection
           rtcPeerConnection={this.rtcPeerConnection1}
           localMediaStream={localMediaStream}
@@ -295,22 +265,49 @@ class RTCMesh extends Component {
           sendMessage={sendMessage}
           roomInfo={{ socketID, roomKey, receiver }}
         />
-        <PeerConnection
-          rtcPeerConnection={this.rtcPeerConnection2}
+        */}
+
+        {peerExist ?
+          <PeerConnection
+          rtcPeerConnection={users[Object.keys(users)[0]].rtcPeerConnection}
           localMediaStream={localMediaStream}
           addRemoteStream={this.addRemoteStream}
-          startConnection={connectionStarted2}
+          startConnection={users[Object.keys(users)[0]].connection}
           sendMessage={sendMessage}
-          roomInfo={{ socketID, roomKey, receiver }}
-        />
-        <PeerConnection
-          rtcPeerConnection={this.rtcPeerConnection3}
+          roomInfo={{ socketID, roomKey }}
+          receiverID={Object.keys(users)[0]}
+          index={0}
+          ></PeerConnection>
+          : <div> Peer not connected </div>
+        }
+
+        {peerExist1 ?
+          <PeerConnection
+          rtcPeerConnection={users[Object.keys(users)[1]].rtcPeerConnection}
           localMediaStream={localMediaStream}
           addRemoteStream={this.addRemoteStream}
-          startConnection={connectionStarted3}
+          startConnection={users[Object.keys(users)[1]].connection}
           sendMessage={sendMessage}
-          roomInfo={{ socketID, roomKey, receiver }}
-        />
+          roomInfo={{ socketID, roomKey }}
+          receiverID={Object.keys(users)[1]}
+          index={1}
+          ></PeerConnection>
+          : <div> Peer not connected </div>
+        }
+
+        {peerExist2 ?
+          <PeerConnection
+          rtcPeerConnection={users[Object.keys(users)[2]].rtcPeerConnection}
+          localMediaStream={localMediaStream}
+          addRemoteStream={this.addRemoteStream}
+          startConnection={users[Object.keys(users)[2]].connection}
+          sendMessage={sendMessage}
+          roomInfo={{ socketID, roomKey }}
+          receiverID={Object.keys(users)[2]}
+          index={2}
+          ></PeerConnection>
+          : <div> Peer not connected </div>
+        }
 
         {/*Change layout to css grid and fromat from there*/}
         <section style={{minWidth: "500px", minHeight: "500px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
