@@ -38,7 +38,7 @@ class App extends Component {
         This is a ReactRTC component imported from outside webflow<br/>
 
         <ErrorBoundary>
-          <RTCMesh URL="ws://localhost:3000"/>
+          <RTCMesh URL="ws://playly-server-alb-732449255.us-east-2.elb.amazonaws.com"/>
         </ErrorBoundary>        
                 
       </div>     
