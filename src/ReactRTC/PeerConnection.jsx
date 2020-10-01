@@ -9,9 +9,8 @@ class PeerConnection extends Component {
 
   addMediaStreamTrack = async () => {
     const { localMediaStream, rtcPeerConnection } = this.props
-    console.log('addMediaStream: ', localMediaStream);
+    //console.log('addMediaStream: ', localMediaStream);
     if (localMediaStream) {
-      console.log("trigger offer")
       await localMediaStream.getTracks().forEach((mediaStreamTrack) => {
         rtcPeerConnection.addTrack(mediaStreamTrack); //This fires the "onNegotiationNeeded" event
       });
@@ -22,6 +21,7 @@ class PeerConnection extends Component {
     const { socketID, sendMessage, roomInfo, rtcPeerConnection, receiverID } = this.props;
     if(socketID != receiverID){
       try {
+        //Here the offer is created
         const offer = await rtcPeerConnection.createOffer();
         await rtcPeerConnection.setLocalDescription(offer);
         const payload = createPayload(roomInfo.roomKey, roomInfo.socketID, rtcPeerConnection.localDescription, receiverID);
@@ -34,7 +34,7 @@ class PeerConnection extends Component {
   }
 
   handleOnIceEvent = (rtcPeerConnectionIceEvent) => {
-    console.log("handleOnIceEvent")
+    //console.log("handleOnIceEvent")
     if (rtcPeerConnectionIceEvent.candidate) {
       const { sendMessage, roomInfo, receiverID } = this.props;
       const { candidate } = rtcPeerConnectionIceEvent;
@@ -45,7 +45,7 @@ class PeerConnection extends Component {
   }
 
   handleOnTrack = (trackEvent) => {
-    console.log("handleOnTrack")
+    //console.log("handleOnTrack")
     const { index } = this.props;
     const remoteMediaStream = new MediaStream([ trackEvent.track ]);
     this.props.addRemoteStream(remoteMediaStream, index);
@@ -53,18 +53,14 @@ class PeerConnection extends Component {
 
   componentDidMount() {
     const { rtcPeerConnection } = this.props;
+    //These functions are activated on RTC events (Browser API functions)
     rtcPeerConnection.onnegotiationneeded = this.handleOnNegotiationNeeded;
     rtcPeerConnection.onicecandidate = this.handleOnIceEvent;
     rtcPeerConnection.ontrack = this.handleOnTrack;
   }
 
   componentDidUpdate(prevProps) {
-    //console.log("component did update")
-    console.log("this.props.startConnection",this.props.startConnection)
-    console.log("prevProps.startConnection", prevProps.startConnection)
-    console.log("activate addmediastreamtrack", this.props.startConnection !== prevProps.startConnection, this.props.rtcPeerConnection)
-    //console.log("activate addmediastreamtrack", this.props.startConnection == true && (prevProps.startConnection == undefined || prevProps.startConnection == false ) )
-
+    //If the user was not connected (users -> connection: false) in previous state, but is in this state, add the track and create offer via negotiation 
     if (this.props.startConnection !== prevProps.startConnection){
       this.addMediaStreamTrack();
     }

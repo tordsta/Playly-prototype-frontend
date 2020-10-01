@@ -21,20 +21,18 @@ class RTCMesh extends Component {
       remoteMediaStream1: null,
       remoteMediaStream2: null,
       remoteMediaStream3: null,
-      socketID: null, //identifier for the websocket server
-
-      //receiver is bad - fix it
-      receiver: false, //the user which currently, only one RTC connection should be active at the time,  
-      users: {}, // object with users and connection state (true/false)
-
+      socketID: null, //identifier for self (this client). The websocket ID is the same as the user ID
+      users: {}, // object format {userID : {user object}, ...} 
     };
     this.socket = new WebSocket(this.props.URL);
   }
 
+  //The function in this class is in the order they are "called" in relation to the 
   componentDidMount(prevProps, prevState) {
     this.openCamera();
 
   }
+
 
   openCamera = async (fromHandleOffer) => {    
     const { mediaConstraints, localMediaStream } = this.state;
@@ -61,9 +59,11 @@ class RTCMesh extends Component {
     }
   }
 
+
   handleSocketConnection = (socketID) => {
     this.setState({socketID});
   }
+
 
   handleUsers = async (data) => {
     this.setState(prevState => {
@@ -76,12 +76,11 @@ class RTCMesh extends Component {
       });
       return {users};
     });
-    console.log("state users", this.state.users)
+    //console.log("state users", this.state.users)
 
     //Send out connection requests
     for (const [user, obj] of Object.entries(this.state.users)) {
-      //console.log(`${user}: ${connected}`);
-      if(!obj.connected && this.state.receiver == false ){
+      if(!obj.connected){
         let peerReceiver = user;        
         const peerData = createMessage(
           "PEER_CONNECTION", 
@@ -95,56 +94,51 @@ class RTCMesh extends Component {
     }
   }
 
+
   handleConnectionReady = (message) => {
-    console.log('Inside handleConnectionReady: ', message);
-    console.log("Is sender:", message.sender == this.state.socketID);
+    //console.log('Inside handleConnectionReady: ', message);
+    //console.log("Is sender:", message.sender == this.state.socketID);
+
+    //We only want one of the clients (sender/receiver) to create and send an offer
+    //If sender is self, set receiver connection to true -> makes offer
     if (message.startConnection && message.sender == this.state.socketID) {
-      //this.setState({receiver: message.receiver})
-      //this.setState({ connectionStarted1: message.startConnection }); //this triggers the addMediaStreamTrack, which triggers the onNegotiationNeeded event
       this.setState(prevState => {
         let users = Object.assign({}, prevState.users);
-        users[message.receiver].connection = true;   // this one activates the add track 
+        users[message.receiver].connection = true;   // this one activates the addMediaTrack in peerConnection.jsx 
         return {users};
       });
 
-    //this is the problem 
-    } else { // if not sender sett start connection
+    } else { // Else create new user and set connection to false -> no offer
       this.setState(prevState => {
         let users = Object.assign({}, prevState.users);
         let rtcPeerConnection = new RTCPeerConnection({ iceServers: this.state.iceServers });
-        users[message.sender] = {connection: false, rtcPeerConnection: rtcPeerConnection};    //this does not activate add track
+        users[message.sender] = {connection: false, rtcPeerConnection: rtcPeerConnection};    //this does not activate addMediaTrack in pperConnection.jsx
         return {users};
       });
     }
-    console.log("state users", this.state.users);
+    //console.log("state users", this.state.users);
   }
-
 
 
   handleOffer = async (data) => {
     const { localMediaStream, roomKey, socketID, users } = this.state;
     const { payload } = data;
-
-    //check if i am reciever 
-    console.log("In offer handle: me -", payload.receiver)
-    console.log("In offer handle: the other one - ", payload.socketID)
     const receiver = payload.socketID
     
     if(payload.receiver == socketID){
       await users[receiver].rtcPeerConnection.setRemoteDescription(payload.message);
       let mediaStream = localMediaStream
       if (!mediaStream) mediaStream = await this.openCamera(true);
-      //set user state to true
 
-      //hack to activate add track media only once
+      //Setts connection to true after receiving offer
       this.setState(prevState => {
         let users = Object.assign({}, prevState.users);
-        users[payload.socketID].connection = true;   // this one activates the add track 
+        users[payload.socketID].connection = true;   //This one activates the addMediaTrack
         return {users};
-      });      
-      
+      });            
 
-      this.setState({ connectionStarted1: true, localMediaStream: mediaStream }, async function() {
+      //Creates and returns an awnser
+      this.setState({ localMediaStream: mediaStream }, async function() {
         const answer = await users[receiver].rtcPeerConnection.createAnswer();
         await users[receiver].rtcPeerConnection.setLocalDescription(answer);
         const payload = createPayload(roomKey, socketID, answer, receiver);
@@ -152,42 +146,33 @@ class RTCMesh extends Component {
         this.socket.send(JSON.stringify(answerMessage));
       });
     } else {
-      console.log("Handle Offer - Not valid")
+      //console.log("Handle Offer - Not valid")
     }
   }
+
 
   handleAnswer = async (data) => {
     const { payload } = data;
-    //console.log("here");
-    //console.log(data)
-    //console.log(data.payload)
-    //console.log(payload.socketID)
-    //console.log(this.state.users[payload.socketID])
     if(payload.receiver == this.state.socketID){
       await this.state.users[payload.socketID].rtcPeerConnection.setRemoteDescription(payload.message);
     } else {
-      console.log("Handle answer - Not valid")
+      //console.log("Handle answer - Not valid")
     }
   }
 
-  handleIceCandidate = async (data) => {
-    const { message } = data.payload;
-    const candidate = JSON.parse(message);
-    //console.log(data);
-    //console.log(data.payload);
-    //console.log(data.payload.receiver);
-    //console.log(this.state.socketID)
-    //console.log(data.payload.receiver == this.state.socketID)
 
-    //TODO - this should be able to handle any number of clients
+  handleIceCandidate = async (data) => {
+    const { message } = data.payload; 
+    const candidate = JSON.parse(message);
     if(data.payload.receiver == this.state.socketID){
       await this.state.users[data.payload.socketID].rtcPeerConnection.addIceCandidate(candidate);
     } else {
-      console.log("Handle Ice candidate - Not valid")
+      //console.log("Handle Ice candidate - Not valid")
     }
-
   }
 
+
+  //TODO - make dynamic or selectable or just expand
   addRemoteStream = (remoteMediaStream, index) => {
     if(index == 0){
       this.setState({remoteMediaStream1: remoteMediaStream});
@@ -202,7 +187,6 @@ class RTCMesh extends Component {
   handleSubmit = (event) => {
     event.preventDefault();
     const { text, socketID } = this.state;
-    // send the roomKey
     // Remove leading and trailing whitespace
     if (text.trim()) {
       const roomKeyMessage = createMessage(TYPE_ROOM, createPayload(text, socketID));
@@ -210,6 +194,7 @@ class RTCMesh extends Component {
     };
     this.setState({ text: '', roomKey: text.trim() });
   }
+
 
   handleChange = (event) => {
     this.setState({
@@ -228,19 +213,17 @@ class RTCMesh extends Component {
       roomKey,
       socketID,
       iceServers, //used to be passed into the websocket component
-      receiver,
       users
     } = this.state;
     const sendMessage = this.socket.send.bind(this.socket);
 
-    //one websocket connection to the server 
-    //multiple peer connections to other clients
+    //One websocket connection to the server 
+    //Multiple RTC PeerConnections the other clients
 
+    //TODO expand or make dynamic or make selectable
     const peerExist = Boolean(Object.keys(users).length > 0 );
     const peerExist1 = Boolean(Object.keys(users).length > 1 );
     const peerExist2 = Boolean(Object.keys(users).length > 2 );
-    //console.log("peer exist", peerExist, Object.keys(users).length, users)
-    //console.log("reciverID: ", Object.keys(users)[0]);
 
     return (
       <>
@@ -255,17 +238,6 @@ class RTCMesh extends Component {
           handleUsers={this.handleUsers}
           socketID={this.state.socketID}
         />
-
-        {/*
-        <PeerConnection
-          rtcPeerConnection={this.rtcPeerConnection1}
-          localMediaStream={localMediaStream}
-          addRemoteStream={this.addRemoteStream}
-          startConnection={connectionStarted1}
-          sendMessage={sendMessage}
-          roomInfo={{ socketID, roomKey, receiver }}
-        />
-        */}
 
         {peerExist ?
           <PeerConnection
@@ -325,9 +297,11 @@ class RTCMesh extends Component {
         />
 
         <section className='button-container'>
-          <div className='button button--start-color' onClick={this.openCamera}></div>
-          {/*<div className='button button--stop-color' onClick={null}></div>*/}
+          <div className='button button--start-color' onClick={this.openCamera}>
+            <p style={{fontSize: "0.8em", textAlign: "center"}}>Reconnect camera</p>
+          </div>
         </section>
+
       </>
     );
   }
