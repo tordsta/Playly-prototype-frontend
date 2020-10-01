@@ -7,8 +7,8 @@ import ErrorBoundary from './errorBoundary';
 import LocalVideoSteam from './localVideoSteam';
 import RemoteVideoSteam from './remoteVideoStream';
 
-import RTCMesh from './ReactRTC/RTCMesh';
-require("./ReactRTC/index.css")
+import RTCMesh from './WebSocketLayer/RTCMesh';
+require("./WebSocketLayer/index.css")
 
 //const url = "ws://localhost:3000"
 //const url = "ws://playly-server-alb-732449255.us-east-2.elb.amazonaws.com";
@@ -38,7 +38,7 @@ class App extends Component {
         This is a ReactRTC component imported from outside webflow<br/>
 
         <ErrorBoundary>
-          <RTCMesh URL="ws://playly-server-alb-732449255.us-east-2.elb.amazonaws.com"/>
+          <RTCMesh URL="ws://localhost:3000"/>
         </ErrorBoundary>        
                 
       </div>     

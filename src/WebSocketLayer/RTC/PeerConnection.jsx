@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { createMessage, createPayload } from './functions/utils';
-import { TYPE_OFFER, TYPE_ICECANDIDATE } from './functions/constants';
+import { createMessage, createPayload } from '../functions/utils';
+import { TYPE_OFFER, TYPE_ICECANDIDATE } from '../functions/constants';
 
 class PeerConnection extends Component {
   constructor(props) {

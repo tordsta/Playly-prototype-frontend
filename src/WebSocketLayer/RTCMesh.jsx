@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import RTCVideo from './RTCVideo.jsx';
-import Form from './Form.jsx';
+import RTCVideo from './RTC/RTCVideo.jsx';
+import Form from './RTC/Form.jsx';
 import Websocket from './Websocket.jsx';
-import PeerConnection from './PeerConnection.jsx';
+import PeerConnection from './RTC/PeerConnection.jsx';
+import GameFrame from "./games/GameFrame";
 import { DEFAULT_CONSTRAINTS, DEFAULT_ICE_SERVERS, TYPE_ROOM, TYPE_ANSWER } from './functions/constants';
 import { buildServers, generateRoomKey, createMessage, createPayload } from './functions/utils';
 
@@ -225,6 +226,8 @@ class RTCMesh extends Component {
     const peerExist1 = Boolean(Object.keys(users).length > 1 );
     const peerExist2 = Boolean(Object.keys(users).length > 2 );
 
+    const gamePath = "../games/uno/index.html";
+
     return (
       <>
         <Websocket 
@@ -282,7 +285,7 @@ class RTCMesh extends Component {
         }
 
         {/*Change layout to css grid and fromat from there*/}
-        <section style={{minWidth: "500px", minHeight: "500px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <section style={{minWidth: "500px", minHeight: "200px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
           <RTCVideo mediaStream={localMediaStream} style={{width: "200px", height: "150px"}}/>
           <RTCVideo mediaStream={remoteMediaStream1} style={{width: "200px", height: "150px"}} />
           <RTCVideo mediaStream={remoteMediaStream2} style={{width: "200px", height: "150px"}}/>
@@ -294,13 +297,18 @@ class RTCMesh extends Component {
           handleChange={this.handleChange}
           hasRoomKey={roomKey}
           text={text}
-        />
+        /> 
 
         <section className='button-container'>
           <div className='button button--start-color' onClick={this.openCamera}>
             <p style={{fontSize: "0.8em", textAlign: "center"}}>Reconnect camera</p>
           </div>
         </section>
+
+        <section>
+          <GameFrame></GameFrame>
+        </section>
+
 
       </>
     );
