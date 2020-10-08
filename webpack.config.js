@@ -8,19 +8,19 @@ module.exports = {
           exclude: /node_modules/,
           use: ['babel-loader']
         },
-         { test: /\.css$/, loader: "style-loader!css-loader" },
-         {
-           test: /\.(pdf|jpg|png|gif|svg|ico)$/,
-           use: [
-             {
-               loader: 'url-loader'
-             },
-           ]
-         },
-         {   
-           test: /\.(woff|woff2|eot|ttf|otf)$/,
-           loader: "file-loader"
-         }
+        { test: /\.css$/, loader: "style-loader!css-loader" },
+        {
+          test: /\.(pdf|jpg|png|gif|svg|ico)$/,
+          use: [
+            {
+              loader: 'url-loader'
+            },
+          ]
+        },
+        {   
+          test: /\.(woff|woff2|eot|ttf|otf)$/,
+          loader: "file-loader"
+        }
       ]
     },
     resolve: {
@@ -33,5 +33,9 @@ module.exports = {
     },
     devServer: {
       contentBase: './dist'
+    },
+    node: {
+      fs: "empty",
+      net: "empty"
     }
-    };
+};

@@ -3,7 +3,7 @@ import RTCVideo from './RTC/RTCVideo.jsx';
 import Form from './RTC/Form.jsx';
 import Websocket from './Websocket.jsx';
 import PeerConnection from './RTC/PeerConnection.jsx';
-import GameFrame from "./games/GameFrame";
+import GameFrame from "./GameFrame";
 import { DEFAULT_CONSTRAINTS, DEFAULT_ICE_SERVERS, TYPE_ROOM, TYPE_ANSWER } from './functions/constants';
 import { buildServers, generateRoomKey, createMessage, createPayload } from './functions/utils';
 

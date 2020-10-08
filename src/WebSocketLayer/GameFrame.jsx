@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import UnoTranslator from "./UnoTranslator";
+import UnoPartyTranslator from "./games/UnoPartyTranslator";
 
 class GameFrame extends Component {
     constructor(props) {
@@ -14,7 +14,7 @@ class GameFrame extends Component {
         return(
           <div style={{height: "500px", width: "500px", backgroundColor: "red"}}>
               Selected game: {this.state.selectedGame}
-              <UnoTranslator/>
+              <UnoPartyTranslator/>
           </div>
         );
       }
