@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Game from "./UnoParty/unoparty-client/src/App";
+import Game from "./unoparty-client/src/index.js";
 
 class UnoPartyTranslator extends Component {
     constructor(props) {

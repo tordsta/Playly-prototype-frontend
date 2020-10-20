@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = {
     entry: './src/index.js',
     mode: 'production',
@@ -8,7 +10,10 @@ module.exports = {
           exclude: /node_modules/,
           use: ['babel-loader']
         },
-        { test: /\.css$/, loader: "style-loader!css-loader" },
+        { 
+          test: /\.css$/, 
+          loader: "style-loader!css-loader" 
+        },
         {
           test: /\.(pdf|jpg|png|gif|svg|ico)$/,
           use: [
@@ -24,7 +29,10 @@ module.exports = {
       ]
     },
     resolve: {
-      extensions: ['*', '.js', '.jsx']
+      extensions: ['*', '.js', '.jsx'],
+      alias: {
+        react: path.resolve('./node_modules/react') //Makes sure the same instance of react is used in the application and in the games
+      }
     },
     output: {
       path: __dirname + '/dist',

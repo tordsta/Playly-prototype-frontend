@@ -12,7 +12,7 @@ class GameFrame extends Component {
 
     render() {
         return(
-          <div style={{height: "500px", width: "500px", backgroundColor: "red"}}>
+          <div style={{height: "500px", width: "1000px", backgroundColor: "red"}}>
               Selected game: {this.state.selectedGame}
               <UnoPartyTranslator/>
           </div>
