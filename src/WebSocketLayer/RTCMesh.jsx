@@ -306,7 +306,7 @@ class RTCMesh extends Component {
         </section>
 
         <section>
-          <GameFrame></GameFrame>
+          <GameFrame socket={this.socket} userID={this.state.socketID}></GameFrame>
         </section>
 
 

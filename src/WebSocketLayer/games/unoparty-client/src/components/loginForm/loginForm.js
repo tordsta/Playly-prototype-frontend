@@ -16,14 +16,20 @@ import Button from 'react-bootstrap/Button';
 
 import CustomJumbotron from '../customJumbotron/customJumbotron';
 
-const LoginForm = ({ setSocket, setPlayerName, setAlert, playerStatus }) => {
+//this whole component should be removed
+const LoginForm = ({ setSocket, setPlayerName, setAlert, playerStatus, userID, wsSocket }) => {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
+    /*
     playerStatus.state === 'success' &&
       import('../../socket.io/socketConnection').then(socket =>
         setSocket(socket.default(username))
       );
+    */
+    if(playerStatus.state === "success"){
+      setSocket(wsSocket);
+    }
 
     playerStatus.error && setAlert({ message: playerStatus.state });
   }, [playerStatus, setSocket, setAlert]);
@@ -47,13 +53,14 @@ const LoginForm = ({ setSocket, setPlayerName, setAlert, playerStatus }) => {
         <CustomJumbotron>
           <div className="login-form-welcome">
             <h3>Welcome!</h3>
+            {userID}
             <h4>Please choose a username</h4>
           </div>
           <Form onSubmit={event => handleClick(event)} className="login-form">
             <Row style={{ padding: '10px 0' }}>
               <Col>
                 <Form.Control
-                  onChange={event => setUsername(event.target.value)}
+                  onChange={event => setUsername(userID)}
                   placeholder="Username"
                 />
               </Col>

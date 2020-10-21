@@ -1,5 +1,5 @@
 import playerTypes from './player.types';
-import axios from 'axios';
+//import axios from 'axios';
 
 const setPlayerNamePending = () => ({
   type: playerTypes.SET_PLAYER_NAME_PENDING
@@ -16,6 +16,8 @@ const setPlayerNameSuccess = username => ({
 });
 
 export const setPlayerName = username => dispatch => {
+  dispatch(setPlayerNameSuccess(username))
+  /*
   dispatch(setPlayerNamePending());
   axios
     .post('/api/auth', {
@@ -29,4 +31,5 @@ export const setPlayerName = username => dispatch => {
         setPlayerNameError(err.response.data ? err.response.data : err.message)
       )
     );
+  */
 };

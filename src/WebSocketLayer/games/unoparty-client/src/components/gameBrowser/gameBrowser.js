@@ -42,7 +42,7 @@ const GameBrowser = ({ availableGames }) => {
             </Fragment>
           ) : (
             <div className="game-browser-empty">
-              <GameBrowserEmptySvg />
+              {/*<GameBrowserEmptySvg />*/}
               <h3>Could Not Find Any Games To Join</h3>
               <h4>Why not create one yourself?</h4>
               <Button

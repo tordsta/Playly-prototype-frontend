@@ -34,11 +34,15 @@ const App = ({
   history,
   currentGame: { inLobby },
   socket,
-  playerName
+  playerName,
+  userID,
+  wsSocket
 }) => {
   const [alert, setAlert] = useState(false);
   useEffect(() => {
     if (socket) {
+      wsSocket.send(JSON.stringify({type: "hahaha", payload: {roomKey: "something"}}));
+      /*
       socket.on('connected', () => {
         socket.emit('requestAvailableGames');
         socket.on('availableGames', data => {
@@ -52,6 +56,7 @@ const App = ({
           setAlert(message);
         });
       });
+      */
     }
   }, [updateAvailableGames, updateCurrentGame, history, socket]);
   useEffect(() => {
@@ -86,7 +91,7 @@ const App = ({
       {socket && playerName ? (
         <Switch>
           <Route exact path="/">
-            <GameBrowserPage />
+            <GameBrowserPage/>
           </Route>
           <ProtectedRoute path="/lobby">
             <GameLobbyPage />
@@ -96,8 +101,9 @@ const App = ({
           </ProtectedRoute>
         </Switch>
       ) : (
-        <LoginForm setAlert={setAlert} />
-      )}    </Container>
+        <LoginForm setAlert={setAlert} userID={userID} wsSocket={wsSocket}/> //this is where the username and socket is connected
+      )}    
+    </Container>
   );
 };
 
