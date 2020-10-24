@@ -34,21 +34,25 @@ const UnoCard = ({
       case 'reverse':
         return (
           <Fragment>
+            {/*
             <ReverseIcon
               style={{ top: '0px', left: '5px' }}
               className="reverse-icon-small"
             />
             <ReverseIcon className="uno-reverse-card-icon" />
+            */}
             <div className="uno-card-middle">
               <div
                 style={{ background: color, border: '4px solid white' }}
                 className="uno-card-middle-circle"
               ></div>
             </div>
+            {/*
             <ReverseIcon
               style={{ bottom: '0px', right: '5px' }}
               className="reverse-icon-small"
             />
+            */}
           </Fragment>
         );
       case '+2':

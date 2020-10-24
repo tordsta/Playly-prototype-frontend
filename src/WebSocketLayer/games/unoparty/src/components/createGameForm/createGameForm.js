@@ -40,32 +40,19 @@ const CreateGameForm = ({ history, updateCurrentGame, socket, lobbyName, players
       passwordProtected: false
     }})
 
-    /*
-    socket.emit('createGame', {
-      name: gameName,
-      maxPlayers: Number(maxPlayers),
-      passwordProtected: false
-    });
-    */
+
 
     wsSocket.addEventListener("message", function(event) {
       const data = JSON.parse(event.data);
       if(data.type == "UNO_PARTY"){
-        console.log("payload from server", data)
+        //console.log("createForm, server payload", data.payload)
+        if(data.payload.type == "gameCreated"){
+          updateCurrentGame(data.payload.payload);
+          history.push('/lobby');
+        }
+
       }
     })
-
-    /*
-    socket.on('gameCreated', data => {
-      updateCurrentGame(data);
-      history.push('/lobby');
-    });
-    */
-
-
-    return () => {
-      socket.off('gameCreated');
-    };
     
 
   };

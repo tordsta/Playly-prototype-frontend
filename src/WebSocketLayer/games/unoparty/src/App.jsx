@@ -60,6 +60,21 @@ const App = ({
     wsSocket.send(JSON.stringify(gameMessage));
   }
   
+  //Dont know where to put this yet
+  /*
+  const handleClick = roomId => {
+    socket.emit('joinGame', { roomId });
+  };
+  
+  <Button
+    onClick={() => handleClick(roomId)}
+    style={{ width: '100%' }}
+    variant="success"
+  >
+    Join Game
+  </Button>
+  
+  */
 
   useEffect(() => {
     if (socket) {
@@ -67,23 +82,25 @@ const App = ({
       wsSocket.addEventListener("message", function(event) {
         const data = JSON.parse(event.data);
         if(data.type == "UNO_PARTY"){
-          console.log("tiggerd by a message from the server", data)
-          
+          console.log("Server is sending:", data.payload)
+          if(data.payload.type == "joinedGame"){
+            let game = data.payload.payload;
+            console.log("app jsx game variable", game)
+            updateCurrentGame(game);
+            history.push('/lobby');
+          }
           //case with types of messages
 
 
           //join game if not host
 
-
-          /*
-          socket.on('joinedGame', game => {
-            updateCurrentGame(game);
-            history.push('/lobby');
-          });
-          */
           
 
           //for the popup alert message, not important to implement
+          
+          //if message from listener does not equal any other message in the application,
+          //set it to default as an alert
+
           /*
           socket.on('message', message => {
             setAlert(message);
@@ -129,10 +146,10 @@ const App = ({
             <GameBrowserPage lobbyName={roomKey} players={players} wsSocket={wsSocket} sendGameMessage={sendGameMessage} />
           </Route>
           <ProtectedRoute path="/lobby">
-            <GameLobbyPage />
+            <GameLobbyPage wsSocket={wsSocket} sendGameMessage={sendGameMessage} />
           </ProtectedRoute>
           <ProtectedRoute condition={inLobby} redirect="/lobby" path="/game">
-            <GamePage />
+            <GamePage wsSocket={wsSocket} sendGameMessage={sendGameMessage}/>
           </ProtectedRoute>
         </Switch>
       ) : (

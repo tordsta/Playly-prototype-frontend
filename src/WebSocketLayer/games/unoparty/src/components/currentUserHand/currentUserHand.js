@@ -16,7 +16,7 @@ import './currentUserHand.styles.css';
 import UnoCard from '../unoCard/unoCard';
 import ColorSelector from '../colorSelector/colorSelector';
 
-const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
+const CurrentUserHand = ({ playerName, currentGamePlayers, socket, wsSocket, sendGameMessage }) => {
   const INITIAL_COLOR_SELECTOR_DATA = {
     show: false,
     cardIndex: ''
@@ -36,6 +36,22 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
   const player = currentGamePlayers.find(player => player.name === playerName);
 
   useEffect(() => {
+    wsSocket.addEventListener("message", function(event) {
+      const data = JSON.parse(event.data);
+      if(data.type == "UNO_PARTY"){
+        //let payload = data.payload.payload
+        switch(data.payload.type){
+          case"unoButton":
+            setToggleCallUnoButton(true);
+            break;
+          case"disableUnoButton":
+            setToggleCallUnoButton(false);
+            break;
+        }
+      }
+    });
+
+    /*
     socket.on('unoButton', () => {
       setToggleCallUnoButton(true);
     });
@@ -43,11 +59,14 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     socket.on('disableUnoButton', () => {
       setToggleCallUnoButton(false);
     });
+    */
 
+    /*
     return () => {
       socket.off('unoButton');
       socket.off('disableUnoButton');
     };
+    */
   }, [setToggleCallUnoButton, socket]);
 
   const playCard = (cardIndex, key) => {
@@ -86,12 +105,13 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
     }
 
     setDeckCardPosition(positionData);
-
-    socket.emit('playCard', { cardIndex });
+    sendGameMessage({type: "playCard", payload: { cardIndex }});
+    //socket.emit('playCard', { cardIndex });
   };
 
   const callUno = () => {
-    socket.emit('callUno');
+    sendGameMessage({type: "callUno"})
+    //socket.emit('callUno');
     setToggleCallUnoButton(false);
   };
 
@@ -107,7 +127,7 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket }) => {
       className="fixed-bottom"
     >
       {colorSelectorData.show && (
-        <ColorSelector
+        <ColorSelector sendGameMessage={sendGameMessage}
           {...colorSelectorData}
           hideColorSelector={() =>
             setColorSelectorData(INITIAL_COLOR_SELECTOR_DATA)

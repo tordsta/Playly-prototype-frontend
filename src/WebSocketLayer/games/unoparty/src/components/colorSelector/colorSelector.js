@@ -12,7 +12,8 @@ const ColorSelector = ({
   cardIndex,
   hideColorSelector,
   setDeckCardPosition,
-  socket
+  socket,
+  sendGameMessage
 }) => {
   const colors = [
     { color: 'Red', bootStrapColor: 'danger' },
@@ -22,7 +23,8 @@ const ColorSelector = ({
   ];
 
   const handleClick = event => {
-    socket.emit('playCard', { cardIndex, colorIndex: event.target.value });
+    sendGameMessage({type: "playCard", payload: { cardIndex, colorIndex: event.target.value }});
+    //socket.emit('playCard', { cardIndex, colorIndex: event.target.value });
     setDeckCardPosition();
     return hideColorSelector();
   };

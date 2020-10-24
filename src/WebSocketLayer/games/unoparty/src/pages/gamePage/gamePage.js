@@ -24,11 +24,52 @@ const GamePage = ({
   socket,
   removePlayer,
   updateCurrentGame,
-  clearCurrentGame
+  clearCurrentGame,
+  wsSocket,
+  sendGameMessage
 }) => {
   useEffect(() => {
     let gameFinished = false;
 
+    wsSocket.addEventListener("message", function(event) {
+      const data = JSON.parse(event.data);
+      if(data.type == "UNO_PARTY"){
+        let payload = data.payload.payload
+        switch(data.payload.type){
+          case"cardPlayed":
+            const {
+              cardPlayerIndex,
+              cardIndex,
+              currentPlayerTurnIndex,
+              currentCard
+            } = payload;
+            playCard(cardPlayerIndex, cardIndex, currentPlayerTurnIndex, currentCard);
+            break;
+
+          case"drawnCard":
+            console.log("data",data)
+            console.log("payload",payload)
+
+            const playerIdx = payload.playerIdx;
+            const randomCards = payload.randomCards;
+            const numCards = payload.numCards;
+            addPlayerCard(playerIdx, randomCards, numCards);
+            break;
+
+          case"playerLeave":
+            playerIdx = payload.playerIdx;
+            removePlayer(playerIdx);
+            break;
+
+          case"gameFinished":
+            
+            gameFinished = true;
+            updateCurrentGame(currentGame);
+            break;
+        }
+      }
+    });
+    /*
     socket.on('cardPlayed', data => {
       const {
         cardPlayerIndex,
@@ -50,15 +91,19 @@ const GamePage = ({
       gameFinished = true;
       updateCurrentGame(currentGame);
     });
+    */
 
     return () => {
+      /*
       socket.off('cardPlayed');
       socket.off('drawnCard');
       socket.off('playerLeave');
       socket.off('gameFinished');
+      */
 
       if (!gameFinished) {
-        socket.emit('leaveRoom');
+        sendGameMessage({type: "leaveRoom"})
+        //socket.emit('leaveRoom');
         clearCurrentGame();
       }
     };
@@ -73,8 +118,8 @@ const GamePage = ({
   return (
     <div className="game-container">
       <OpponentHand />
-      <Deck />
-      <CurrentUserHand />
+      <Deck sendGameMessage={sendGameMessage}/>
+      <CurrentUserHand wsSocket={wsSocket} sendGameMessage={sendGameMessage}/>
     </div>
   );
 };

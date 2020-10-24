@@ -35,15 +35,58 @@ const Lobby = ({
   socket,
   clearCurrentGame,
   removePlayer,
-  setCurrentGameHost
+  setCurrentGameHost,
+  wsSocket,
+  sendGameMessage
 }) => {
   const { maxPlayers, name, players, host, isHost, roomId } = currentGame;
+  
   const startGame = roomId => {
-    socket.emit('startGame', roomId);
+    //socket.emit('startGame', roomId);
+    sendGameMessage({type:"startGame", payload: {roomId: roomId}})
   };
 
   useEffect(() => {
     let gameStarted = false;
+    
+    wsSocket.addEventListener("message", function(event) {
+      const data = JSON.parse(event.data);
+      if(data.type == "UNO_PARTY"){
+        //console.log("lobbyJS, server payload", data.payload)
+        switch(data.payload.type){
+          case "initGame":
+            let players = data.payload.payload.players
+            let currentCard = data.payload.payload.currentCard
+            
+            updateCurrentGameCurrentCard(currentCard);
+            gameStarted = true;
+            initGame(players);
+            history.push('/game');
+            break;
+          
+          case "playerJoin":
+            let player = data.payload.payload.player
+            addPlayer(player);
+            break;
+          
+          case "newHost":
+            let username = data.payload.payload.username
+            setCurrentGameHost(username);
+            break;
+          
+          case "playerLeave":
+            let playerIdx = data.payload.payload.playerIdx
+            removePlayer(playerIdx);
+            break;
+
+          default:
+            //console.log("Defult switch activated at lobby.js", data.payload)
+        }
+  
+      }
+    })
+  
+    /*
     socket.on('initGame', data => {
       socket.on('currentCard', card => {
         updateCurrentGameCurrentCard(card);
@@ -52,27 +95,19 @@ const Lobby = ({
         history.push('/game');
       });
     });
-    socket.on('playerJoin', player => {
-      addPlayer(player);
-    });
-
-    socket.on('newHost', username => {
-      setCurrentGameHost(username);
-    });
-
-    socket.on('playerLeave', playerIdx => {
-      removePlayer(playerIdx);
-    });
+*/
 
     return () => {
+      /*
       socket.off('initGame');
       socket.off('currentCard');
       socket.off('playerJoin');
       socket.off('playerLeave');
       socket.off('newHost');
-
+      */
       if (!gameStarted) {
-        socket.emit('leaveRoom');
+        sendGameMessage({type: "leaveRoom"});
+        //socket.emit('leaveRoom');
         clearCurrentGame();
       }
     };

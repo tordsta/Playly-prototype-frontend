@@ -11,11 +11,12 @@ import Col from 'react-bootstrap/Col';
 import UnoCard from '../unoCard/unoCard';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
 
-const Deck = ({ currentGame: { currentCard }, socket }) => {
+const Deck = ({ currentGame: { currentCard }, socket, sendGameMessage }) => {
   const [currentDeckCard, setCurrentDeckCard] = useState(undefined);
 
   const drawCard = () => {
-    socket.emit('requestCard');
+    sendGameMessage({type: "requestCard"});
+    //socket.emit('requestCard');
   };
 
   useEffect(() => {

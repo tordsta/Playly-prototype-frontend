@@ -10,6 +10,14 @@ import './logo.styles.css';
 const Logo = ({ watermark }) => {
   return (
     <Fragment>
+      Logo
+    </Fragment>
+  );
+};
+
+export default Logo;
+
+/*
       {watermark ? (
         <UnoPartyLogo
           style={{
@@ -24,12 +32,8 @@ const Logo = ({ watermark }) => {
       ) : (
         <Row className="logo">
           <Col lg="6">
-            {/*<UnoPartyLogo className="logo-svg" />*/}
+            <UnoPartyLogo className="logo-svg" />
           </Col>
         </Row>
       )}
-    </Fragment>
-  );
-};
-
-export default Logo;
+*/
