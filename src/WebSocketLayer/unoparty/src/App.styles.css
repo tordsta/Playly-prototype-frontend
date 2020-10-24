@@ -1,0 +1,27 @@
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: rgb(64, 64, 64);
+}
+
+#root {
+  min-height: 100%;
+  height: 100%;
+}
+
+.app {
+  height: 100%;
+  position: relative;
+  overflow-y: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-bottom: 0;
+}

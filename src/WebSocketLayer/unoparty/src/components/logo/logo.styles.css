@@ -1,0 +1,11 @@
+.logo {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  color: white;
+}
+
+.logo-svg {
+  height: 20vh;
+}

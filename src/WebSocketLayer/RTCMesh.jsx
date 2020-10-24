@@ -304,13 +304,14 @@ class RTCMesh extends Component {
             <p style={{fontSize: "0.8em", textAlign: "center"}}>Reconnect camera</p>
           </div>
         </section>
-        
+
         <section>
           { this.state.roomKey && 
-            <GameFrame socket={this.socket} userID={this.state.socketID} roomKey={this.state.roomKey}/>            
+            <GameFrame socket={this.socket} userID={this.state.socketID} roomKey={this.state.roomKey} players={this.state.users}/>            
           }
         </section>
-
+       
+    
 
       </>
     );
