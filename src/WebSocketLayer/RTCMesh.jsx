@@ -286,13 +286,15 @@ class RTCMesh extends Component {
           <RTCVideo mediaStream={remoteMediaStream1} style={{width: "400px", height: "300px"}} />
           <RTCVideo mediaStream={remoteMediaStream2} style={{width: "400px", height: "300px"}}/>
         </section>
-        
-        <Form
-          handleSubmit={this.handleSubmit}
-          handleChange={this.handleChange}
-          hasRoomKey={roomKey}
-          text={text}
-        /> 
+
+        {!roomKey &&
+          <Form
+            handleSubmit={this.handleSubmit}
+            handleChange={this.handleChange}
+            hasRoomKey={roomKey}
+            text={text}
+          /> 
+        }
 
         <section>
           { this.state.roomKey && 

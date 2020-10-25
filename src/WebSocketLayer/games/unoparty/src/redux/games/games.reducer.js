@@ -87,14 +87,23 @@ const gamesReducer = (state = INITIAL_STATE, action) => {
     }
     case gamesTypes.ADD_PLAYER_CARD: {
       const { playerIdx, cards, numCards } = action.payload;
+      console.log("reducer", playerIdx, cards, numCards)
       const players = deepCopyArray(state.currentGame.players);
       if (cards) {
+        console.log("cards are true")
         const playerCards = state.currentGame.players[playerIdx].cards;
         const player = players[playerIdx];
         player.cards = [...playerCards, ...cards];
         players[playerIdx] = player;
       } else {
-        players[playerIdx].cards += numCards;
+        console.log("cards are false")
+        console.log(players)
+        console.log(players[playerIdx].cards)
+        const length = Object.keys(players[playerIdx].cards).length
+        for(let i = 0; i < numCards; i++){
+          let dumNum = i + length;
+          players[playerIdx].cards.push({key: dumNum});
+        }
       }
       return {
         ...state,

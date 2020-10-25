@@ -13,8 +13,10 @@ import Col from 'react-bootstrap/Col';
 import UnoCardBackside from '../unoCardBackside/unoCardBackside';
 import PlayerAvatar from '../playerAvatar/playerAvatar';
 
-const OpponentHand = ({ currentGame: { players }, playerName }) => {
+const OpponentHand = ({ currentGame: { players }, playerName, gridPos }) => {
   const renderOpponentCards = () => {
+    console.log(Object.keys(players[0].cards))
+    console.log(Object.keys(players[1].cards))
     const cards = players
       .filter(player => player.name !== playerName && Object.keys(player.cards).length > 0)
       .map((player, idx) => {
@@ -23,14 +25,15 @@ const OpponentHand = ({ currentGame: { players }, playerName }) => {
           cards.push(<UnoCardBackside key={i} additionalStyles={{width: "75px", height: "100px", marginLeft: "-30px"}} />);
         }
         console.log(cards)
+        const gridPlacement = gridPos[idx];
         return (
-          <div className="opponent-hand-cards" key={idx} style={{marginLeft: "30px", padding: "10px"}}>{cards}</div>
+          <div className="opponent-hand-cards" key={idx} style={Object.assign({}, {marginLeft: "0px", paddingLeft: "40px"}, gridPlacement)}>{cards}</div>
         );
       });
     return cards;
   };
 
-  return <Fragment className="opponent-hand-container">{renderOpponentCards()}</Fragment>;
+  return <Fragment>{renderOpponentCards()}</Fragment>;
 };
 
 /*

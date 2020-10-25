@@ -12,7 +12,7 @@ class GameFrame extends Component {
 
     render() {
         return(
-          <div style={{display: "flex", alignItems: "stretch", height: "auto", minWidth: "800px"}}>
+          <div style={{display: "flex", alignItems: "stretch", height: "auto", minWidth: "800px", maxWidth: "100vw"}}>
             <UnoPartyTranslator userID={this.props.userID} socket={this.props.socket} roomKey={this.props.roomKey} players={this.props.players}/>
           </div>
         );

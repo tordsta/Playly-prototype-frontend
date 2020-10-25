@@ -46,13 +46,10 @@ const GamePage = ({
             playCard(cardPlayerIndex, cardIndex, currentPlayerTurnIndex, currentCard);
             break;
 
+          //The opponents used to only have a number indicating their cards
+          //In this implementasion all the cards are js objects, the original have the information from gameInit
           case"drawnCard":
-            console.log("data",data)
-            console.log("payload",payload)
-
-            const playerIdx = payload.playerIdx;
-            const randomCards = payload.randomCards;
-            const numCards = payload.numCards;
+            const { playerIdx, randomCards, numCards } = payload;
             addPlayerCard(playerIdx, randomCards, numCards);
             break;
 
@@ -115,6 +112,26 @@ const GamePage = ({
     updateCurrentGame,
     clearCurrentGame
   ]);
+  const gridPosition1 = {
+    gridColumnStart: "1", 
+    gridColumnEnd: "2",
+    gridRowStart: "1", 
+    gridRowEnd: "2"
+  }
+  const gridPosition2 = {
+    gridColumnStart: "3", 
+    gridColumnEnd: "4",
+    gridRowStart: "1", 
+    gridRowEnd: "2"
+  }
+  const gridPosition3 = {
+    gridColumnStart: "3", 
+    gridColumnEnd: "4",
+    gridRowStart: "3", 
+    gridRowEnd: "4"
+  }
+  const posArray = [gridPosition1, gridPosition2, gridPosition3]
+
   return (
     <div 
       className="game-container" 
@@ -123,12 +140,14 @@ const GamePage = ({
         gridTemplateRows: "100px 100px 100px", 
         gridTemplateColumns: "1fr 1fr 1fr"
       }}>
-      <OpponentHand />
+      <OpponentHand gridPos={posArray}/>
       <Deck 
         sendGameMessage={sendGameMessage} 
         style={{
           gridColumnStart: "2", 
-          gridColumnEnd: "3"
+          gridColumnEnd: "3",
+          gridRowStart: "1", 
+          gridRowEnd: "4"
       }}/>
       <CurrentUserHand 
         wsSocket={wsSocket} 

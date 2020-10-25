@@ -18,7 +18,7 @@ import { setPlayerName } from './redux/player/player.actions';
 import Container from 'react-bootstrap/Container';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.styles.css';
+//import './App.styles.css';
 
 import Logo from './components/logo/logo';
 import ProtectedRoute from './components/protectedRoute/protectedRoute';

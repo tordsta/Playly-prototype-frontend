@@ -20,7 +20,7 @@ class UnoPartyTranslator extends Component {
 
     render() {
         return(
-          <div style={{width: "100%"}}>
+          <div style={{width: "100%", margin: "20px"}}>
               <Provider store = {store}>
                 <MemoryRouter>
                   <App userID={this.props.userID} wsSocket={this.props.socket} roomKey={this.props.roomKey} players={this.props.players}/>
