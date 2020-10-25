@@ -242,7 +242,7 @@ class RTCMesh extends Component {
           socketID={this.state.socketID}
         />
 
-        {peerExist ?
+        {peerExist &&
           <PeerConnection
           rtcPeerConnection={users[Object.keys(users)[0]].rtcPeerConnection}
           localMediaStream={localMediaStream}
@@ -253,10 +253,9 @@ class RTCMesh extends Component {
           receiverID={Object.keys(users)[0]}
           index={0}
           ></PeerConnection>
-          : <div> Peer not connected </div>
         }
 
-        {peerExist1 ?
+        {peerExist1 &&
           <PeerConnection
           rtcPeerConnection={users[Object.keys(users)[1]].rtcPeerConnection}
           localMediaStream={localMediaStream}
@@ -267,10 +266,9 @@ class RTCMesh extends Component {
           receiverID={Object.keys(users)[1]}
           index={1}
           ></PeerConnection>
-          : <div> Peer not connected </div>
         }
 
-        {peerExist2 ?
+        {peerExist2 &&
           <PeerConnection
           rtcPeerConnection={users[Object.keys(users)[2]].rtcPeerConnection}
           localMediaStream={localMediaStream}
@@ -281,17 +279,14 @@ class RTCMesh extends Component {
           receiverID={Object.keys(users)[2]}
           index={2}
           ></PeerConnection>
-          : <div> Peer not connected </div>
         }
 
         {/*Change layout to css grid and fromat from there*/}
-        <section style={{minWidth: "500px", minHeight: "200px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
-          <RTCVideo mediaStream={localMediaStream} style={{width: "200px", height: "150px"}}/>
-          <RTCVideo mediaStream={remoteMediaStream1} style={{width: "200px", height: "150px"}} />
-          <RTCVideo mediaStream={remoteMediaStream2} style={{width: "200px", height: "150px"}}/>
-          <RTCVideo mediaStream={remoteMediaStream3} style={{width: "200px", height: "150px"}}/>
+        <section style={{minWidth: "800px", minHeight: "300px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+          <RTCVideo mediaStream={remoteMediaStream1} style={{width: "400px", height: "300px"}} />
+          <RTCVideo mediaStream={remoteMediaStream2} style={{width: "400px", height: "300px"}}/>
         </section>
-
+        
         <Form
           handleSubmit={this.handleSubmit}
           handleChange={this.handleChange}
@@ -299,19 +294,25 @@ class RTCMesh extends Component {
           text={text}
         /> 
 
-        <section className='button-container'>
-          <div className='button button--start-color' onClick={this.openCamera}>
-            <p style={{fontSize: "0.8em", textAlign: "center"}}>Reconnect camera</p>
-          </div>
-        </section>
-
         <section>
           { this.state.roomKey && 
             <GameFrame socket={this.socket} userID={this.state.socketID} roomKey={this.state.roomKey} players={this.state.users}/>            
           }
         </section>
-       
-    
+
+        <section style={{minWidth: "800px", minHeight: "300px", display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" }}>
+          <RTCVideo mediaStream={localMediaStream} style={{width: "400px", height: "300px"}}/>
+          <RTCVideo mediaStream={remoteMediaStream3} style={{width: "400px", height: "300px"}}/>
+        </section>
+
+
+        {/*
+        <section className='button-container'>
+          <div className='button button--start-color' onClick={this.openCamera}>
+            <p style={{fontSize: "0.8em", textAlign: "center"}}>Reconnect camera</p>
+          </div>
+        </section>
+        */}
 
       </>
     );

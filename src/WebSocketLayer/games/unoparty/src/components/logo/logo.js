@@ -10,7 +10,6 @@ import './logo.styles.css';
 const Logo = ({ watermark }) => {
   return (
     <Fragment>
-      Logo
     </Fragment>
   );
 };

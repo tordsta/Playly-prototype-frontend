@@ -116,10 +116,24 @@ const GamePage = ({
     clearCurrentGame
   ]);
   return (
-    <div className="game-container">
+    <div 
+      className="game-container" 
+      style={{
+        display: "grid", 
+        gridTemplateRows: "100px 100px 100px", 
+        gridTemplateColumns: "1fr 1fr 1fr"
+      }}>
       <OpponentHand />
-      <Deck sendGameMessage={sendGameMessage}/>
-      <CurrentUserHand wsSocket={wsSocket} sendGameMessage={sendGameMessage}/>
+      <Deck 
+        sendGameMessage={sendGameMessage} 
+        style={{
+          gridColumnStart: "2", 
+          gridColumnEnd: "3"
+      }}/>
+      <CurrentUserHand 
+        wsSocket={wsSocket} 
+        sendGameMessage={sendGameMessage}
+      />
     </div>
   );
 };

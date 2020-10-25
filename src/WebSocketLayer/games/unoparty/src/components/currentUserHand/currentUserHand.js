@@ -145,7 +145,14 @@ const CurrentUserHand = ({ playerName, currentGamePlayers, socket, wsSocket, sen
           </Button>
         </div>
       )}
-      <Col className="current-user-hand fixed-bottom" sm="12">
+      <Col className="current-user-hand fixed-bottom" sm="12"
+        style={{
+          minWidth: "300px",
+          maxWidth: "40vw",
+          left: "50%",
+          marginLeft: "-20vw"
+        }}
+      >
         {transitions.map(({ item, props, key }, idx) => {
           let cardProps = {
             playCard: () => playCard(idx, key),

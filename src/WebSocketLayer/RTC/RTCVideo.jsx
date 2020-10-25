@@ -19,7 +19,7 @@ class RTCVideo extends PureComponent {
     return (
       <video
         className="rtc__video"
-        style={{width: '200px', height: "150px", backgroundColor: 'black'}}
+        style={{width: '400px', height: "300px", backgroundColor: 'black'}}
         autoPlay
         ref={mediaStream ? this.addMediaStream : null}
       >

@@ -35,12 +35,9 @@ class App extends Component {
   render() {
     return (
       <div>        
-        This is a ReactRTC component imported from outside webflow<br/>
-
         <ErrorBoundary>
           <RTCMesh URL="ws://localhost:3000"/>
         </ErrorBoundary>        
-                
       </div>     
     )
   }
