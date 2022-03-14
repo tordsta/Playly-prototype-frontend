@@ -1,0 +1,31 @@
+.game-browser {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-browser-title {
+  color: white;
+  width: 80%;
+}
+
+.game-browser-info {
+  display: flex;
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+.game-browser-empty {
+  color: white;
+  text-align: center;
+}
+
+.game-browser-empty svg {
+  height: 200px;
+  width: auto;
+}
+
+.game-browser-empty h3 {
+  font-weight: bold;
+  padding: 20px;
+}

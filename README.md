@@ -14,3 +14,11 @@ To start local development: yarn start
 To build: yarn build
 To deploy: yarn deploy
 To build and deploy: yarn bd
+
+## Game documentation
+
+[https://showcase.codethislab.com/games/four_colors/readme/](https://showcase.codethislab.com/games/four_colors/readme/)
+
+## Nested NPM packages
+
+[https://strongloop.com/strongblog/modular-node-js-express/](https://strongloop.com/strongblog/modular-node-js-express/)
