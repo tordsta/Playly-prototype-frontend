@@ -4,7 +4,7 @@ var join = require('path').join
 var cp = require('child_process')
 
 // get library path
-var lib = resolve(__dirname, './src/WebSocketLayer/games/unoparty-client/')
+var lib = resolve(__dirname, './src/WebSocketLayer/games/unoparty/')
 
 fs.readdirSync(lib)
   .forEach(function (mod) {
